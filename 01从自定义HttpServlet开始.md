@@ -61,7 +61,7 @@ public class UserServlet extends HttpServlet {
 
 3. 配置tomcat并启动服务访问配置的URL结果如下图所示
 
-![image-20220608220107366](/Users/zhangdongdong/code/java/easy-spring/01从自定义HttpServlet开始.assets/image-20220608220107366.png)
+![image-20220608220107366](https://raw.githubusercontent.com/zh-d-d/pic-repository/main/image-20220608220107366.png)
 
 ## 对比example-goal的实现
 
@@ -193,8 +193,9 @@ public class UserController {
 
 spring-webmvc启动注册过程：
 
-![image-20220608224632316](/Users/zhangdongdong/code/java/easy-spring/01从自定义HttpServlet开始.assets/image-20220608224632316.png)
+![image-20220608224632316](https://raw.githubusercontent.com/zh-d-d/pic-repository/main/image-20220608224632316.png)
 
 spring-webmvc接收请求流程图
 
-![image-20220608230255250](/Users/zhangdongdong/code/java/easy-spring/01从自定义HttpServlet开始.assets/image-20220608230255250.png)
+![image-20220608230255250](https://raw.githubusercontent.com/zh-d-d/pic-repository/main/image-20220608230255250.png)
+

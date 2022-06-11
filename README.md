@@ -28,19 +28,22 @@
 
 # 目标场景
 
-最终期望使用自己简化后的spring-webmvc实现`example-goal`模块的功能:
+最终期望使用自己简化后的spring-webmvc实现`example-goal`模块的功能。
 
-使用spring-webmvc实现一个Java web项目。web.xml声名使用的Servlet；通过spring-mvc-config.xml定义业务接口；调用接口返回Json数据。
+example-goal功能如下：
 
-![image-20220607224510676](/Users/zhangdongdong/code/java/easy-spring/README.assets/image-20220607224510676.png)
+使用spring-webmvc实现一个Java web项目。
 
+- 在web.xml声名使用的Servlet；
+- 通过spring-mvc-config.xml定义业务接口；
+- 调用接口返回Json数据。
+- 返回结果如下图
 
+![image-20220607224510676](https://raw.githubusercontent.com/zh-d-d/pic-repository/main/image-20220607224510676.png)
 
 # 代码结构
 
-![image-20220607224451752](/Users/zhangdongdong/code/java/easy-spring/README.assets/image-20220607224451752.png)
-
-
+![image-20220607224451752](https://raw.githubusercontent.com/zh-d-d/pic-repository/main/image-20220607224451752.png)
 
 - spring-webmvc和spring-web是要实现的两个模块
 - example中定义了两个项目

@@ -50,7 +50,7 @@ Servlet接口定义了如下五个方法
 
 # DispatcherServlet的类结构体系
 
-![image-20220609232155504](/Users/zhangdongdong/code/java/easy-spring/02创建DispatcherServlet来处理所有的请求.assets/image-20220609232155504.png)
+![image-20220609232155504](https://raw.githubusercontent.com/zh-d-d/pic-repository/main/image-20220609232155504.png)
 
 正如Servlet生命周期所描述，当http请求到达HttpServlet的service方法后：
 
@@ -62,11 +62,13 @@ Servlet接口定义了如下五个方法
 
 了解了一个http请求从HttpServlet到DispatchServlet的流程，那代码实现也就简单了。那这个主干流程是如何发现的呢？答案就是debug。在UserController的业务方法内进行断点，调用暴露的接口触发断点，这个时候查看当前现场的调用栈情况这个流程也就梳理出来了。
 
-![image-20220611094541892](/Users/zhangdongdong/code/java/easy-spring/02创建DispatcherServlet来处理所有的请求.assets/image-20220611094541892.png)
+![image-20220611094541892](https://raw.githubusercontent.com/zh-d-d/pic-repository/main/image-20220611094541892.png)
+
+
 
 spring实现该流程过程中每个方法都做了较多的处理，为了简化我们只对主干方法进行实现。主要代码结构如下
 
-![image-20220611104202895](/Users/zhangdongdong/code/java/easy-spring/02创建DispatcherServlet来处理所有的请求.assets/image-20220611104202895.png)
+![image-20220611104202895](https://raw.githubusercontent.com/zh-d-d/pic-repository/main/image-20220611104202895.png)
 
 ```java
 public abstract class FrameworkServlet extends HttpServletBean {
@@ -141,7 +143,7 @@ public class DispatcherServlet extends FrameworkServlet {
 
 example-easy-spring结构如下
 
-![image-20220611104952454](/Users/zhangdongdong/code/java/easy-spring/02创建DispatcherServlet来处理所有的请求.assets/image-20220611104952454.png)
+![image-20220611104952454](https://raw.githubusercontent.com/zh-d-d/pic-repository/main/image-20220611104952454.png)
 
 主要就是web.xml中声名一个Servlet即我们自己实现的DispatchServlet，同时生命该DispatcherServlet匹配所有的url。
 
@@ -170,7 +172,7 @@ example-easy-spring结构如下
 
 启动该项目调用该服务暴露的端口，可以看到输出的日志。
 
-![image-20220611105403652](/Users/zhangdongdong/code/java/easy-spring/02创建DispatcherServlet来处理所有的请求.assets/image-20220611105403652.png)
+![image-20220611105403652](https://raw.githubusercontent.com/zh-d-d/pic-repository/main/image-20220611105403652.png)
 
 ```tex
 11-Jun-2022 10:52:52.982 INFO [http-nio-8080-exec-1] org.springframework.web.servlet.DispatcherServlet.doDispatch 接收到请求:path: /
