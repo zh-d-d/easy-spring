@@ -45,7 +45,7 @@
 
 初始化参数`contextConfigLocation`在spring体系里是由FrameworkServlet维护的。设置流程如下图：
 
-![image-20220611225252036](https://raw.githubusercontent.com/zh-d-d/pic-repository/main/image-20220611225252036.png)
+![image-20220611225252036](03启动spring.assets/image-20220611225252036.png)
 
 1. HttpServletBean重写了Servlet的init方法，所以会在tomcat启动的生命周期里执行
 2. 在init方法中将获取到的初始化参数调用spring-beans模块中的属性访问器功能模块去设置到对应的位置
@@ -54,7 +54,7 @@
 
 debug查看其调用栈如下图：
 
-![image-20220611230905624](https://raw.githubusercontent.com/zh-d-d/pic-repository/main/image-20220611230905624.png)
+![image-20220611230905624](03启动spring.assets/image-20220611230905624.png)
 
 ## 代码实现
 
@@ -123,7 +123,7 @@ debug查看其调用栈如下图：
 
 debug启动`example-easy-spring`可以看到setContextConfigLocation方法被调用
 
-<img src="https://raw.githubusercontent.com/zh-d-d/pic-repository/main/image-20220612092959275.png" alt="image-20220612092959275" style="zoom:50%;" />
+<img src="03启动spring.assets/image-20220612092959275.png" alt="image-20220612092959275" style="zoom:50%;" />
 
 # 启动spring生命周期，并注册回调监听
 
@@ -131,7 +131,7 @@ debug启动`example-easy-spring`可以看到setContextConfigLocation方法被调
 
 启动spring流程图如下所示：
 
-![image-20220612175232780](https://raw.githubusercontent.com/zh-d-d/pic-repository/main/image-20220612175232780.png)
+![image-20220612175232780](03启动spring.assets/image-20220612175232780.png)
 
 1. HttpServletBean重写了Servlet的init方法，所以会按照Servlet的生命周期执行init方法。在init方法里处理完Servlet的初始化参数之后，会调用模版方法initServletBean
 2. FrameworkServlet重写了initServletBean方法，经过层层处理在该类的configureAndRefreshWebapplicationContext方法里触发了spring的启动
@@ -197,7 +197,7 @@ protected WebApplicationContext createWebApplicationContext(@Nullable Applicatio
 
 refresh方法真正的实现是在AbstractApplicationContext类中，这块逻辑在单独描述吧不属于当前的范围内。XmlWebApplicationContext算是应用上下文在web层面使用xml处理的一个类，是AbstractApplicationContext的子类所以可以调用refresh方法。
 
-![image-20220612213404381](https://raw.githubusercontent.com/zh-d-d/pic-repository/main/image-20220612213404381.png)
+![image-20220612213404381](03启动spring.assets/image-20220612213404381.png)
 
 这里之所以把这个类关系图列出来主要是描述一点，在spring实现过程中有很多这种模式。一个类A实现了接口B，但是接口B中定义的方法却是让类A的父类C实现的。稍微有点绕抽象成简单的类关系之后代码如下：
 
@@ -224,4 +224,4 @@ public class Child extends Parent implements Function {
 
 debug启动`example-easy-spring`项目效果如下：
 
-![image-20220612215906490](https://raw.githubusercontent.com/zh-d-d/pic-repository/main/image-20220612215906490.png)
+![image-20220612215906490](03启动spring.assets/image-20220612215906490.png)
