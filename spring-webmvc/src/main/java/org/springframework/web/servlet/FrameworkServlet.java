@@ -35,6 +35,11 @@ public abstract class FrameworkServlet extends HttpServletBean {
     @Nullable
     private WebApplicationContext webApplicationContext;
 
+
+    private volatile boolean refreshEventReceived;
+
+    private final Object onRefreshMonitor = new Object();
+
     public Class<?> getContextClass() {
         return contextClass;
     }
@@ -50,6 +55,25 @@ public abstract class FrameworkServlet extends HttpServletBean {
 
     public void setContextConfigLocation(@Nullable String contextConfigLocation) {
         this.contextConfigLocation = contextConfigLocation;
+    }
+
+    /**
+     * Callback that receives refresh events from this servlet's
+     * WebApplicationContext.
+     */
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        this.refreshEventReceived = true;
+        synchronized (this.onRefreshMonitor) {
+            onRefresh(event.getApplicationContext());
+        }
+    }
+
+    /**
+     * Template method which can be overridden to add servlet-specific refresh work.
+     * Called after successful context refresh.
+     */
+    protected void onRefresh(ApplicationContext context) {
+
     }
 
 
@@ -111,7 +135,7 @@ public abstract class FrameworkServlet extends HttpServletBean {
 
         @Override
         public void onApplicationEvent(ContextRefreshedEvent event) {
-            logger.info("接收回调事件");
+            FrameworkServlet.this.onApplicationEvent(event);
         }
     }
 
