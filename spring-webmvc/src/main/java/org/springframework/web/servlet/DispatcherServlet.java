@@ -1,9 +1,15 @@
 package org.springframework.web.servlet;
 
+import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.annotation.AnnotationAwareOrderComparator;
+import org.springframework.lang.Nullable;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author zhangdd on 2022/6/11
@@ -11,13 +17,29 @@ import javax.servlet.http.HttpServletResponse;
 public class DispatcherServlet extends FrameworkServlet {
 
 
+    @Nullable
+    private List<HandlerMapping> handlerMappings;
+
     @Override
     protected void onRefresh(ApplicationContext context) {
         initStrategies(context);
     }
 
-    protected void initStrategies(ApplicationContext context){
+    protected void initStrategies(ApplicationContext context) {
 
+        initHandlerMappings(context);
+    }
+
+    private void initHandlerMappings(ApplicationContext context) {
+        this.handlerMappings = null;
+        //Find all HandlerMappings in the ApplicationContext, including ancestor contexts.
+        Map<String, HandlerMapping> matchingBeans =
+                BeanFactoryUtils.beansOfTypeIncludingAncestors(context, HandlerMapping.class, true, false);
+        if (!matchingBeans.isEmpty()) {
+            this.handlerMappings = new ArrayList<>(matchingBeans.values());
+            //We keep HandlerMappings in sorted order.
+            AnnotationAwareOrderComparator.sort(this.handlerMappings);
+        }
     }
 
 
@@ -27,6 +49,35 @@ public class DispatcherServlet extends FrameworkServlet {
     }
 
     protected void doDispatch(HttpServletRequest request, HttpServletResponse response) throws Exception {
-        logger.info("接收到请求:path: " + request.getRequestURI());
+
+        HttpServletRequest processedRequest = request;
+
+
+        HandlerExecutionChain mappedHandler = getHandler(processedRequest);
+        if (null == mappedHandler) {
+            noHandlerFound(processedRequest, response);
+            return;
+        }
+
+    }
+
+    /**
+     * Return the HandlerExecutionChain for this request.
+     */
+    @Nullable
+    protected HandlerExecutionChain getHandler(HttpServletRequest request) throws Exception {
+        if (null != this.handlerMappings) {
+            for (HandlerMapping mapping : this.handlerMappings) {
+                HandlerExecutionChain handler = mapping.getHandler(request);
+                if (null != handler) {
+                    return handler;
+                }
+            }
+        }
+        return null;
+    }
+
+    protected void noHandlerFound(HttpServletRequest request, HttpServletResponse response) throws Exception {
+
     }
 }

@@ -2,6 +2,7 @@ package org.springframework.web.method;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 import java.lang.reflect.Method;
@@ -27,7 +28,15 @@ public class HandlerMethod {
     public HandlerMethod(Object bean, Method method) {
         this.bean = bean;
         this.method = method;
-        this.beanType=ClassUtils.getUserClass(bean);
+        this.beanType = ClassUtils.getUserClass(bean);
+    }
+
+    private HandlerMethod(HandlerMethod handlerMethod, Object handler) {
+        Assert.notNull(handlerMethod, "HandlerMethod is required");
+        Assert.notNull(handler, "Handler object is required");
+        this.bean = handler;
+        this.method = handlerMethod.method;
+        this.beanType = handlerMethod.beanType;
     }
 
     public Object getBean() {
@@ -40,5 +49,11 @@ public class HandlerMethod {
 
     public Class<?> getBeanType() {
         return beanType;
+    }
+
+
+    public HandlerMethod createWithResolvedBean() {
+
+        return new HandlerMethod(this, this.bean);
     }
 }

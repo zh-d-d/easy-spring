@@ -1,5 +1,7 @@
 package org.springframework.web.servlet.mvc.condition;
 
+import org.springframework.lang.Nullable;
+
 import javax.servlet.http.HttpServletRequest;
 
 /**
@@ -19,4 +21,13 @@ public interface RequestCondition<T> {
      * method-level {@code RequestMapping} annotation.
      */
     T combine(T other);
+
+    /**
+     * Check if the condition matches the request returning a potentially new
+     * instance created for the current request. For example a condition with
+     * multiple URL patterns may return a new instance only with those patterns that
+     * match the request.
+     */
+    @Nullable
+    T getMatchingCondition(HttpServletRequest request);
 }

@@ -16,6 +16,23 @@ import java.lang.reflect.Method;
  */
 public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMapping {
 
+
+    private RequestMappingInfo.BuilderConfiguration config = new RequestMappingInfo.BuilderConfiguration();
+
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        this.config=new RequestMappingInfo.BuilderConfiguration();
+
+        if (null!=getPatternParser()){
+            this.config.setPatternParser(getPatternParser());
+        }else {
+            this.config.setPathMatcher(getPathMatcher());
+        }
+
+        super.afterPropertiesSet();
+    }
+
     /**
      * Whether the given type is a handler with handler methods.
      * <p>
@@ -76,9 +93,9 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
                 .paths(requestMapping.path())
                 .mappingName(requestMapping.name());
 
-        if (null!=customCondition){
+        if (null != customCondition) {
             builder.customCondition(customCondition);
         }
-        return builder.build();
+        return builder.options(this.config).build();
     }
 }

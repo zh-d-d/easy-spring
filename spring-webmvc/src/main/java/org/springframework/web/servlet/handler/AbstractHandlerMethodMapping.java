@@ -8,7 +8,9 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.servlet.HandlerMapping;
 
+import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -29,6 +31,13 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
      * provided is not a handler method.
      */
     protected abstract T getMappingForMethod(Method method, Class<?> handlerType);
+
+    /**
+     * Check if a mapping matches the current request and return a
+     * mapping with conditions relevant to the current request.
+     */
+    @Nullable
+    protected abstract T getMatchingMapping(T mapping, HttpServletRequest request);
 
     /**
      * Bean name prefix for target beans behind scoped proxies. Used to exclude those
@@ -128,6 +137,63 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
         return new HandlerMethod(handler, method);
     }
 
+
+    @Override
+    @Nullable
+    protected HandlerMethod getHandlerInternal(HttpServletRequest request) throws Exception {
+        String lookupPath = initLookupPath(request);
+        HandlerMethod handlerMethod = lookupHandlerMethod(lookupPath, request);
+        return null != handlerMethod ? handlerMethod.createWithResolvedBean() : null;
+    }
+
+
+    /**
+     * Look up the best-matching handler method for the current request. If multiple
+     * matches are found, the best match is selected.
+     */
+    @Nullable
+    protected HandlerMethod lookupHandlerMethod(String lookupPath, HttpServletRequest request) throws Exception {
+        List<Match> matches = new ArrayList<>();
+        List<T> directPathMatches = this.mappingRegistry.getMappingsByDirectPath(lookupPath);
+        if (null != directPathMatches) {
+            addMatchingMapping(directPathMatches, matches, request);
+        }
+        if (matches.isEmpty()) {
+            addMatchingMapping(this.mappingRegistry.getRegistration().keySet(), matches, request);
+        }
+        if (!matches.isEmpty()) {
+            Match bestMatch = matches.get(0);
+
+            request.setAttribute(BEST_MATCHING_HANDLER_ATTRIBUTE, bestMatch.getHandlerMethod());
+            handleMatch(bestMatch.mapping, lookupPath, request);
+            return bestMatch.getHandlerMethod();
+        } else {
+            return handleNoMatch(this.mappingRegistry.getRegistration().keySet(), lookupPath, request);
+        }
+    }
+
+    private void addMatchingMapping(Collection<T> mappings, List<Match> matches, HttpServletRequest request) {
+        for (T mapping : mappings) {
+            T match = getMatchingMapping(mapping, request);
+            if (null != match) {
+                matches.add(new Match(match, this.mappingRegistry.getRegistration().get(mapping)));
+            }
+        }
+    }
+
+    protected void handleMatch(T mapping, String lookupPath, HttpServletRequest request) {
+        request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, lookupPath);
+    }
+
+    /**
+     * Invoke when no matching is not found.
+     */
+    @Nullable
+    protected HandlerMethod handleNoMatch(Set<T> mapping, String lookupPath, HttpServletRequest request)
+            throws Exception {
+        return null;
+    }
+
     protected Set<String> getMappingPathPatterns(T mapping) {
         return Collections.emptySet();
     }
@@ -155,7 +221,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 
         private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
 
-        public Map<T, MappingRegistration<T>> getRegistry() {
+        public Map<T, MappingRegistration<T>> getRegistration() {
             return registry;
         }
 
@@ -254,5 +320,23 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
         public boolean hasCorsConfig() {
             return this.corsConfig;
         }
+    }
+
+    private class Match {
+
+        private final T mapping;
+
+        private final MappingRegistration<T> registration;
+
+        public Match(T mapping, MappingRegistration<T> registration) {
+            this.mapping = mapping;
+            this.registration = registration;
+        }
+
+        public HandlerMethod getHandlerMethod() {
+            return this.registration.getHandlerMethod();
+        }
+
+
     }
 }
