@@ -11,6 +11,8 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 /**
+ * 这个条件使用已经解析的{@link PathPattern}去匹配
+ *
  * @author zhangdd on 2022/6/25
  */
 public class PathPatternsRequestCondition extends AbstractRequestCondition<PathPatternsRequestCondition> {

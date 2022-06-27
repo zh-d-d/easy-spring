@@ -11,6 +11,8 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
 /**
+ * 使用 AntPathMatcher 进行字符串的匹配
+ *
  * @author zhangdd on 2022/6/22
  */
 public class PatternsRequestCondition extends AbstractRequestCondition<PatternsRequestCondition> {
