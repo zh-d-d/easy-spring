@@ -2,8 +2,13 @@ package org.springframework.web.method;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.context.MessageSource;
+import org.springframework.core.BridgeMethodResolver;
+import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Method;
 
@@ -21,14 +26,48 @@ public class HandlerMethod {
 
     private final Object bean;
 
-    private final Method method;
+    @Nullable
+    private final BeanFactory beanFactory;
 
     private final Class<?> beanType;
 
+    private final Method method;
+
+    protected final Method bridgedMethod;
+
     public HandlerMethod(Object bean, Method method) {
         this.bean = bean;
+        this.beanFactory = null;
         this.method = method;
         this.beanType = ClassUtils.getUserClass(bean);
+        this.bridgedMethod = BridgeMethodResolver.findBridgedMethod(method);
+        ReflectionUtils.makeAccessible(this.bridgedMethod);
+    }
+
+    public HandlerMethod(String beanName, BeanFactory beanFactory,
+                         @Nullable MessageSource messageSource, Method method) {
+        Assert.hasText(beanName, "Bean name is required");
+        Assert.notNull(beanFactory, "BeanFactory is required");
+        Assert.notNull(method, "Method is required");
+        this.bean = beanName;
+        this.beanFactory = beanFactory;
+        Class<?> beanType = beanFactory.getType(beanName);
+        if (beanType == null) {
+            throw new IllegalStateException("Cannot resolve bean type for bean with name '" + beanName + "'");
+        }
+        this.beanType = ClassUtils.getUserClass(beanType);
+        this.method = method;
+        this.bridgedMethod = BridgeMethodResolver.findBridgedMethod(method);
+        ReflectionUtils.makeAccessible(this.bridgedMethod);
+    }
+
+    protected HandlerMethod(HandlerMethod handlerMethod) {
+        Assert.notNull(handlerMethod, "HandlerMethod is required");
+        this.bean = handlerMethod.bean;
+        this.method = handlerMethod.method;
+        this.beanType = handlerMethod.beanType;
+        this.bridgedMethod = handlerMethod.bridgedMethod;
+        this.beanFactory= handlerMethod.beanFactory;
     }
 
     private HandlerMethod(HandlerMethod handlerMethod, Object handler) {
@@ -37,6 +76,8 @@ public class HandlerMethod {
         this.bean = handler;
         this.method = handlerMethod.method;
         this.beanType = handlerMethod.beanType;
+        this.bridgedMethod = handlerMethod.bridgedMethod;
+        this.beanFactory= handlerMethod.beanFactory;
     }
 
     public Object getBean() {
@@ -51,9 +92,18 @@ public class HandlerMethod {
         return beanType;
     }
 
+    public Method getBridgedMethod() {
+        return bridgedMethod;
+    }
 
     public HandlerMethod createWithResolvedBean() {
+        Object handler = this.bean;
+        if (this.bean instanceof String) {
+            Assert.state(this.beanFactory != null, "Cannot resolve bean name without BeanFactory");
+            String beanName = ((String) this.bean);
+            handler = this.beanFactory.getBean(beanName);
+        }
 
-        return new HandlerMethod(this, this.bean);
+        return new HandlerMethod(this, handler);
     }
 }

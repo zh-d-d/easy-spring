@@ -5,6 +5,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.lang.Nullable;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
@@ -20,6 +21,9 @@ public class DispatcherServlet extends FrameworkServlet {
     @Nullable
     private List<HandlerMapping> handlerMappings;
 
+    @Nullable
+    private List<HandlerAdapter> handlerAdapters;
+
     @Override
     protected void onRefresh(ApplicationContext context) {
         initStrategies(context);
@@ -28,17 +32,28 @@ public class DispatcherServlet extends FrameworkServlet {
     protected void initStrategies(ApplicationContext context) {
 
         initHandlerMappings(context);
+        initHandlerAdapters(context);
     }
 
     private void initHandlerMappings(ApplicationContext context) {
         this.handlerMappings = null;
         //Find all HandlerMappings in the ApplicationContext, including ancestor contexts.
-        Map<String, HandlerMapping> matchingBeans =
-                BeanFactoryUtils.beansOfTypeIncludingAncestors(context, HandlerMapping.class, true, false);
+        Map<String, HandlerMapping> matchingBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(context, HandlerMapping.class, true, false);
         if (!matchingBeans.isEmpty()) {
             this.handlerMappings = new ArrayList<>(matchingBeans.values());
             //We keep HandlerMappings in sorted order.
             AnnotationAwareOrderComparator.sort(this.handlerMappings);
+        }
+    }
+
+    private void initHandlerAdapters(ApplicationContext context) {
+        this.handlerAdapters = null;
+        //Find all HandlerAdapters in the ApplicationContext, including ancestor contexts.
+        Map<String, HandlerAdapter> matchingBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(context, HandlerAdapter.class, true, false);
+        if (!matchingBeans.isEmpty()) {
+            this.handlerAdapters = new ArrayList<>(matchingBeans.values());
+            //We keep HandlerAdapters in sorted order.
+            AnnotationAwareOrderComparator.sort(this.handlerAdapters);
         }
     }
 
@@ -58,6 +73,10 @@ public class DispatcherServlet extends FrameworkServlet {
             noHandlerFound(processedRequest, response);
             return;
         }
+
+        HandlerAdapter ha = getHandlerAdapter(mappedHandler.getHandler());
+
+        ModelAndView mv = ha.handle(processedRequest, response, mappedHandler.getHandler());
 
     }
 
@@ -79,5 +98,18 @@ public class DispatcherServlet extends FrameworkServlet {
 
     protected void noHandlerFound(HttpServletRequest request, HttpServletResponse response) throws Exception {
 
+    }
+
+
+    protected HandlerAdapter getHandlerAdapter(Object handler) throws ServletException {
+        if (null != this.handlerAdapters) {
+            for (HandlerAdapter adapter : this.handlerAdapters) {
+                if (adapter.supports(handler)) {
+                    return adapter;
+                }
+            }
+        }
+        throw new ServletException("No adapter for handler [" + handler +
+                "]: The DispatcherServlet configuration needs to include a HandlerAdapter that supports this handler");
     }
 }
