@@ -1,19 +1,29 @@
 package org.springframework.web.servlet.mvc.method.annotation;
 
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.lang.Nullable;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
+import org.springframework.web.method.support.HandlerMethodReturnValueHandlerComposite;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author zhangdd on 2022/7/2
  */
-public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter {
+public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
+        implements InitializingBean {
+
+    @Nullable
+    private HandlerMethodReturnValueHandlerComposite returnValueHandlers;
+
 
     /**
      * Always return true since any method argument and return value
@@ -40,6 +50,10 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter {
 
         ServletInvocableHandlerMethod invocableMethod = createInvocableHandlerMethod(handlerMethod);
 
+        if (this.returnValueHandlers != null) {
+            invocableMethod.setHandlerMethodReturnValueHandlers(this.returnValueHandlers);
+        }
+
         ModelAndViewContainer mavContainer = new ModelAndViewContainer();
 
         //对于@ResponseBody的情况，将调用业务方法，同时将方法返回值放到response的body里
@@ -53,5 +67,22 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter {
 
     protected ServletInvocableHandlerMethod createInvocableHandlerMethod(HandlerMethod handlerMethod) {
         return new ServletInvocableHandlerMethod(handlerMethod);
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        if (this.returnValueHandlers == null) {
+            List<HandlerMethodReturnValueHandler> handlers = getDefaultReturnValueHandlers();
+            this.returnValueHandlers = new HandlerMethodReturnValueHandlerComposite().addHandlers(handlers);
+        }
+    }
+
+    private List<HandlerMethodReturnValueHandler> getDefaultReturnValueHandlers() {
+        List<HandlerMethodReturnValueHandler> handlers = new ArrayList<>(20);
+//        handlers.add(new RequestResponseBodyMethodProcessor(getMessageConverters(),
+//                this.contentNegotiationManager, this.requestResponseBodyAdvice));
+        handlers.add(new RequestResponseBodyMethodProcessor());
+
+        return handlers;
     }
 }
