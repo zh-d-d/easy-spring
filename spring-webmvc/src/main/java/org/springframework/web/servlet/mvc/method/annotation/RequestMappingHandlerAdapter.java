@@ -1,6 +1,7 @@
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.lang.Nullable;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.HandlerMethod;
@@ -24,6 +25,20 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
     @Nullable
     private HandlerMethodReturnValueHandlerComposite returnValueHandlers;
 
+    private List<HttpMessageConverter<?>> messageConverters;
+
+
+    public RequestMappingHandlerAdapter() {
+        this.messageConverters = new ArrayList<>(4);
+    }
+
+    public void setMessageConverters(List<HttpMessageConverter<?>> messageConverters) {
+        this.messageConverters = messageConverters;
+    }
+
+    public List<HttpMessageConverter<?>> getMessageConverters() {
+        return messageConverters;
+    }
 
     /**
      * Always return true since any method argument and return value
@@ -81,7 +96,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
         List<HandlerMethodReturnValueHandler> handlers = new ArrayList<>(20);
 //        handlers.add(new RequestResponseBodyMethodProcessor(getMessageConverters(),
 //                this.contentNegotiationManager, this.requestResponseBodyAdvice));
-        handlers.add(new RequestResponseBodyMethodProcessor());
+        handlers.add(new RequestResponseBodyMethodProcessor(getMessageConverters()));
 
         return handlers;
     }

@@ -1,5 +1,7 @@
 package org.springframework.web;
 
+import org.springframework.http.MediaType;
+
 import java.util.List;
 
 /**
@@ -16,12 +18,12 @@ public class HttpMediaTypeNotAcceptableException extends HttpMediaTypeException 
         super(message);
     }
 
-//    /**
-//     * Create a new HttpMediaTypeNotSupportedException.
-//     *
-//     * @param supportedMediaTypes the list of supported media types
-//     */
-//    public HttpMediaTypeNotAcceptableException(List<MediaType> supportedMediaTypes) {
-//        super("Could not find acceptable representation", supportedMediaTypes);
-//    }
+    /**
+     * Create a new HttpMediaTypeNotSupportedException.
+     *
+     * @param supportedMediaTypes the list of supported media types
+     */
+    public HttpMediaTypeNotAcceptableException(List<MediaType> supportedMediaTypes) {
+        super("Could not find acceptable representation", supportedMediaTypes);
+    }
 }

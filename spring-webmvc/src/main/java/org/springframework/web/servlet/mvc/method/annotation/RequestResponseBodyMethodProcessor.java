@@ -2,17 +2,24 @@ package org.springframework.web.servlet.mvc.method.annotation;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
+import java.util.List;
+
 /**
  * @author zhangdd on 2022/7/3
  */
 public class RequestResponseBodyMethodProcessor extends AbstractMessageConverterMethodProcessor {
 
+
+    protected RequestResponseBodyMethodProcessor(List<HttpMessageConverter<?>> converters) {
+        super(converters);
+    }
 
     @Override
     public boolean supportsReturnType(MethodParameter returnType) {

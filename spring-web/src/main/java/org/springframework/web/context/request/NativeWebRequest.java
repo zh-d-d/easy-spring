@@ -7,6 +7,9 @@ import org.springframework.lang.Nullable;
  */
 public interface NativeWebRequest extends WebRequest {
 
+    @Nullable
+    String[] getHeaderValues(String headerName);
+
     /**
      * Return the underlying native request object, if available.
      */

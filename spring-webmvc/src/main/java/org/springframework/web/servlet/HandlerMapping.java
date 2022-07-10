@@ -18,6 +18,15 @@ public interface HandlerMapping {
     String PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE = HandlerMapping.class.getName() + ".pathWithinHandlerMapping";
 
     /**
+     * Name of the {@link HttpServletRequest} attribute that contains the set of
+     * producible MediaTypes applicable to the mapped handler.
+     * <p>Note: This attribute is not required to be supported by all
+     * HandlerMapping implementations. Handlers should not necessarily expect
+     * this request attribute to be present in all scenarios.
+     */
+    String PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE = HandlerMapping.class.getName() + ".producibleMediaTypes";
+
+    /**
      * Return a handler and any interceptors for this request.
      */
     @Nullable
